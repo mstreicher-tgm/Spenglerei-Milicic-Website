@@ -1,0 +1,28 @@
+@media only screen and (min-width: 993px) {
+  main {
+    padding-left: 306px;
+  }
+  ul#slide-out {
+    padding-top: 30px;
+  }
+  .nav-container {
+    padding-left: 310px;
+  }
+}
+
+main {
+  height: calc(100vh - 64px);
+}
+
+
+textarea.company_description {
+  height: 200px;
+}
+
+.file-path-wrapper label {
+  margin-left: 66px;
+}
+
+.colorpreview {
+  padding: 0px 28px;
+}
