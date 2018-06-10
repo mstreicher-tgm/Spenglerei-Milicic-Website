@@ -1,6 +1,8 @@
 USE milicic;
 
-INSERT INTO einstellung(firmenname, beschreibung, impressum, hinweise, headerfarbe, footerfarbe, akzentfarbe) values("Company", "beschreibung", "impressum", "Sämtliche Inhalte sowie die Struktur der Website sind urheberrechtlich geschützt.Die Verwendung von Texten und Bildmaterial (auch auszugsweise) zu privaten und/oder kommerziellen Zwecken bedarf der vorherigen ausdrücklichen schriftlichen Zustimmung.", "#ef5350", "#0097a7", "#ef5350");
+INSERT INTO einstellung(firmenname, beschreibung, impressum, hinweise) values("Company", "beschreibung", "impressum", "Sämtliche Inhalte sowie die Struktur der Website sind urheberrechtlich geschützt.Die Verwendung von Texten und Bildmaterial (auch auszugsweise) zu privaten und/oder kommerziellen Zwecken bedarf der vorherigen ausdrücklichen schriftlichen Zustimmung.");
+INSERT INTO design(headerfarbe, footerfarbe, akzentfarbe, slider1, slider2, slider3) values("#009688", "#e91e63", "#f44336", "assets/img/slider/default.png", "assets/img/slider/default.png", "assets/img/slider/default.png");
+
 
 INSERT INTO farbe(name, hexcode) values("red lighten-5", "#ffebee");
 INSERT INTO farbe(name, hexcode) values("red lighten-4", "#ffcdd2");

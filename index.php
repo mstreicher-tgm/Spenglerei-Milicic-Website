@@ -8,6 +8,9 @@
   $result = $statement->execute(array('id' => 1));
   $einstellung = $statement->fetch();
 
+  $statement = $pdo->prepare("SELECT * FROM design WHERE id = :id");
+  $result = $statement->execute(array('id' => 1));
+  $design = $statement->fetch();
 
   $statement = $pdo->prepare("SELECT * FROM person");
   $result = $statement->execute();
@@ -27,7 +30,7 @@
   <body>
     <header>
       <div class="navbar-fixed">
-        <nav style="background-Color: <?php echo $einstellung['headerfarbe']; ?>">
+        <nav style="background-Color: <?php echo $design['headerfarbe']; ?>">
           <div class="nav-wrapper">
             <div class="container">
               <a class="brand-logo"><?php echo $einstellung['firmenname']; ?></a>
@@ -55,7 +58,7 @@
 
 
     <div class="fixed-action-btn scale-transition scale-out" style="margin-bottom: 15px">
-      <a class="btn-floating page-scroll" href="#home">
+      <a class="btn-floating page-scroll" style="background-Color: <?php echo $design['akzentfarbe']; ?>" href="#home">
         <i class="material-icons">keyboard_arrow_up</i>
       </a>
     </div>
@@ -64,13 +67,13 @@
       <div class="slider fullscreen" id="home">
         <ul class="slides">
           <li class="center-align">
-            <img src="assets/img/slider/slider1.png">
+            <img src="<?php echo $design['slider1']; ?>">
           </li>
           <li class="center-align">
-            <img src="assets/img/slider/slider2.png">
+            <img src="<?php echo $design['slider2']; ?>">
           </li>
           <li class="center-align">
-            <img src="assets/img/slider/slider3.png">
+            <img src="<?php echo $design['slider3']; ?>">
           </li>
         </ul>
       </div>
@@ -266,7 +269,7 @@
       </div>
     </main>
 
-    <footer class="page-footer" style="background-Color: <?php echo $einstellung['footerfarbe']; ?>">
+    <footer class="page-footer" style="background-Color: <?php echo $design['footerfarbe']; ?>">
       <div class="container">
         <div class="row">
           <div class="col l6 s12">

@@ -32,12 +32,19 @@ CREATE TABLE einstellung (
   beschreibung text NOT NULL,
   impressum text NOT NULL,
   hinweise text NOT NULL,
-  headerfarbe varchar(255) NOT NULL,
-  footerfarbe varchar(255) NOT NULL,
-  akzentfarbe varchar(255) NOT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE design (
+  id INT unsigned NOT NULL AUTO_INCREMENT,
+  headerfarbe varchar(255) NOT NULL,
+  footerfarbe varchar(255) NOT NULL,
+  akzentfarbe varchar(255) NOT NULL,
+  slider1 varchar(255) NOT NULL,
+  slider2 varchar(255) NOT NULL,
+  slider3 varchar(255) NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 CREATE TABLE userdata (
