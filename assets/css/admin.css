@@ -2,6 +2,9 @@
   main {
     padding-left: 306px;
   }
+  footer {
+    padding-left: 306px;
+  }
   ul#slide-out {
     padding-top: 30px;
   }
@@ -10,19 +13,51 @@
   }
 }
 
+body {
+  max-height: 100vh;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  background-color: #eeeeee;
+}
+
 main {
-  height: calc(100vh - 64px);
+    height: calc(100vh - 64px - 112px);
+    flex: 1 0 auto;
+  }
+
+  ul.dropdown-content {
+    left: auto !important;
+    right: 0 !important;
 }
 
+ul.dropdown-content li a {
+    color: black;
+  }
 
-textarea.company_description {
-  height: 200px;
+  ul.dropdown-content li:hover {
+    background-color: #eeeeee;
+  }
+
+  ul.dropdown-below {
+    top: 64px !important;
+    width: 220px;
+  }
+  .row-bottom {
+      margin-top: 0px;
+      margin-bottom: 0px !important;
+  }
+
+  .page-footer {
+    padding-top: 5px;
+  }
+
+.row {
+  margin-bottom: 0px;
 }
 
-.file-path-wrapper label {
-  margin-left: 66px;
-}
-
-.colorpreview {
-  padding: 0px 28px;
+span.badge {
+  position: relative;
+  display: inline-block;
+  float: none;
 }
