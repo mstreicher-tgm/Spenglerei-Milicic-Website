@@ -18,7 +18,7 @@
         require_once('../../assets/php/functions.php');
 
         if(isset($_GET['delete'])) {
-          $id = isset($_GET['delete']);
+          $id = $_GET['delete'];
 
           $statement = $pdo->prepare("SELECT * FROM userdata WHERE id = :id");
           $result = $statement->execute(array('id' => $id));
@@ -40,7 +40,7 @@
 
 
         if(isset($_GET['activate'])) {
-          $id = isset($_GET['activate']);
+          $id = $_GET['activate'];
 
           $statement = $pdo->prepare("SELECT * FROM userdata WHERE id = :id");
           $result = $statement->execute(array('id' => $id));
@@ -62,7 +62,7 @@
 
 
         if(isset($_GET['deactivate'])) {
-          $id = isset($_GET['deactivate']);
+          $id = $_GET['deactivate'];
 
           $statement = $pdo->prepare("SELECT * FROM userdata WHERE id = :id");
           $result = $statement->execute(array('id' => $id));
@@ -73,12 +73,45 @@
             $result = $statement->execute(array('id' => $id));
 
             if($result) {
-              echo "<script>M.toast({html: 'Benuter wurde erfolgreich Dektiviert!'});</script>";
+              echo "<script>M.toast({html: 'Benuter wurde erfolgreich Deaktiviert!'});</script>";
             } else {
               echo "<script>M.toast({html: 'Etwas ist schief gelaufen, bitte erneut versuchen!'});</script>";
             }
           } else {
             echo "<script>M.toast({html: 'Dieser Benuter existiert nicht!'});</script>";
+          }
+        }
+
+        if(isset($_POST['register'])) {
+          $username = $_POST['username'];
+          $passwort = $_POST['passwort'];
+          $passwort2 = $_POST['passwort2'];
+
+          if($passwort == $passwort2) {
+            if(strlen($passwort) >= 8) {
+              $statement = $pdo->prepare("SELECT * FROM userdata WHERE username = :username");
+              $result = $statement->execute(array('username' => $username));
+              $user = $statement->fetch();
+
+              if($user == false) {
+                $password_hash = password_hash($passwort, PASSWORD_DEFAULT);
+
+                $statement = $pdo->prepare("INSERT INTO userdata (username, passwort, status, eigentümer) VALUES (:username, :passwort, true, false)");
+                $result = $statement->execute(array('username' => $username, 'passwort' => $password_hash));
+
+                if($result) {
+                  echo "<script>M.toast({html: 'Benuter wurde erfolgreich erstellt!'});</script>";
+                } else {
+                  echo "<script>M.toast({html: 'Etwas ist schief gelaufen, bitte veruche es erneut!'});</script>";
+                }
+              } else {
+                echo "<script>M.toast({html: 'Username wird bereits verwendet!'});</script>";
+              }
+            } else {
+              echo "<script>M.toast({html: 'Passwort ist zu kurz (min. 8 Zeichen)!'});</script>";
+            }
+          } else {
+            echo "<script>M.toast({html: 'Passwörter stimmen nicht überein!'});</script>";
           }
         }
     ?>
@@ -107,6 +140,7 @@
         <li><a href="../contact"><i class="material-icons">phone</i> Kontakt</a></li>
         <li class="divider"></li>
         <li><a href="../settings"><i class="material-icons">settings</i> Einstellungen</a></li>
+        <li><a href="../design"><i class="material-icons">format_paint</i> Design</a></li>
         <li class="active"><a><i class="material-icons">person</i> Benutzerverwaltung</a></li>
       </ul>
 
@@ -120,6 +154,36 @@
     <main>
       <br>
       <div class="row">
+        <div class="col l12 m12 s12">
+          <div class="card-panel">
+            <form action="index.php" method="post">
+              <div class="row">
+                <div class="col l12 m12 s12">
+                  <div class="input-field">
+                    <input type="text" name="username" id="username" autocomplete="off" required />
+                    <label for="username">Username</label>
+                  </div>
+                </div>
+                <div class="col l6 m6 s12">
+                  <div class="input-field">
+                    <input type="password" name="passwort" id="passwort" autocomplete="off" required />
+                    <label for="Passwort">Passwort</label>
+                  </div>
+                </div>
+                <div class="col l6 m6 s12">
+                  <div class="input-field">
+                    <input type="password" name="passwort2" id="passwort2" autocomplete="off" required />
+                    <label for="Passwort2">Passwort wiederholen</label>
+                  </div>
+                </div>
+                <div class="col l12 m12 s12 right-align">
+                  <button type="submit" name="register" id="register" class="btn waves-effect waves-light">Erstellen</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <div class="col l12 m12 s12">
           <div class="card-panel">
             <table class="striped centered">
@@ -141,7 +205,7 @@
                     <a href="?deactivate=<?php echo $row['id']; ?>"><span class="new badge green" data-badge-caption="Aktiviert"></span></a>
                   <?php } ?>
                   <?php if($row['status'] == 0) { ?>
-                    <a href="?activate=<?php echo $row['id']; ?>"><span class="new badge red" data-badge-caption="Dektiviert"></span></a>
+                    <a href="?activate=<?php echo $row['id']; ?>"><span class="new badge red" data-badge-caption="Deaktiviert"></span></a>
                   <?php } ?>
                   </td>
                   <td><a href="?delete=<?php echo $row['id']; ?>" class="btn transparent btn-flat"><i class="material-icons">delete</i></a></td>

@@ -18,6 +18,8 @@
       require_once('../../assets/php/password.php');
       require_once('../../assets/php/functions.php');
 
+      $adminuser = check_user();
+
       $statement = $pdo->prepare("SELECT * FROM einstellung WHERE id = :id");
       $result = $statement->execute(array('id' => 1));
       $einstellung = $statement->fetch();
@@ -65,7 +67,8 @@
         <li><a href="../contact"><i class="material-icons">phone</i> Kontakt</a></li>
         <li class="divider"></li>
         <li class="active"><a><i class="material-icons">settings</i> Einstellungen</a></li>
-        <li><a href="../users"><i class="material-icons">person</i> Benutzerverwaltung</a></li>
+        <li><a href="../design"><i class="material-icons">format_paint</i> Design</a></li>
+        <?php if($adminuser['eigentümer']) { ?><li><a href="../users"><i class="material-icons">person</i> Benutzerverwaltung</a></li><?php } ?>
       </ul>
 
       <ul id="drop_profile" class="dropdown-content dropdown-below white">

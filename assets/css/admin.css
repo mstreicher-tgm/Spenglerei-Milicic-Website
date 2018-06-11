@@ -43,6 +43,12 @@ ul.dropdown-content li a {
     top: 64px !important;
     width: 220px;
   }
+
+
+  ul.dropdown-content.select-dropdown li span {
+      color: black; /* no need for !important :) */
+  }
+
   .row-bottom {
       margin-top: 0px;
       margin-bottom: 0px !important;

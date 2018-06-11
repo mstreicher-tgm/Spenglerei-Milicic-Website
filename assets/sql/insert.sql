@@ -1,5 +1,6 @@
 USE milicic;
 
+INSERT INTO userdata(username,passwort,status,eingentümer) values("admin", "$2y$10$Qt8EsNeOhPQUyC0LM1JTkuVS79n6oUbgjsCmdbZCqbPOdZlyNjLuW", true, true);
 INSERT INTO einstellung(firmenname, beschreibung, impressum, hinweise) values("Company", "beschreibung", "impressum", "Sämtliche Inhalte sowie die Struktur der Website sind urheberrechtlich geschützt.Die Verwendung von Texten und Bildmaterial (auch auszugsweise) zu privaten und/oder kommerziellen Zwecken bedarf der vorherigen ausdrücklichen schriftlichen Zustimmung.");
 INSERT INTO design(headerfarbe, footerfarbe, akzentfarbe, slider1, slider2, slider3) values("#009688", "#e91e63", "#f44336", "assets/img/slider/default.png", "assets/img/slider/default.png", "assets/img/slider/default.png");
 

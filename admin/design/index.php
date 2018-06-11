@@ -18,21 +18,19 @@
       require_once('../../assets/php/password.php');
       require_once('../../assets/php/functions.php');
 
+      $adminuser = check_user();
+
       $statement = $pdo->prepare("SELECT * FROM einstellung WHERE id = :id");
       $result = $statement->execute(array('id' => 1));
       $einstellung = $statement->fetch();
 
       if(isset($_POST['update'])) {
-        $firmenname = $_POST['name'];
-        $beschreibung = $_POST['description'];
-        $hinweise = $_POST['rules'];
-        $impressum = $_POST['impressum'];
 
-        $statement = $pdo->prepare("UPDATE einstellung SET firmenname = :firmenname, beschreibung = :beschreibung, hinweise = :hinweise, impressum = :impressum WHERE id = 1");
+        $statement = $pdo->prepare("UPDATE design SET firmenname = :firmenname, beschreibung = :beschreibung, hinweise = :hinweise, impressum = :impressum WHERE id = 1");
         $result = $statement->execute(array('firmenname' => $firmenname, 'beschreibung' => $beschreibung, 'hinweise' => $hinweise, 'impressum' => $impressum));
 
         if($result) {
-          echo "<script>M.toast({html: 'Einstellungen wurden Aktualisieren!'});</script>";
+          echo "<script>M.toast({html: 'Design wurden Aktualisieren!'});</script>";
         } else {
           echo "<script>M.toast({html: 'Etwas ist schief gelaufen, bitte erneut versuchen!'});</script>";
         }
@@ -64,8 +62,9 @@
         <li><a href="../galerie"><i class="material-icons">insert_photo</i> Galerie</a></li>
         <li><a href="../contact"><i class="material-icons">phone</i> Kontakt</a></li>
         <li class="divider"></li>
-        <li class="active"><a><i class="material-icons">settings</i> Einstellungen</a></li>
-        <li><a href="../users"><i class="material-icons">person</i> Benutzerverwaltung</a></li>
+        <li><a href="../settings"><i class="material-icons">settings</i> Einstellungen</a></li>
+        <li class="active"><a href=""><i class="material-icons">format_paint</i> Design</a></li>
+        <?php if($adminuser['eigentümer']) { ?><li><a href="../users"><i class="material-icons">person</i> Benutzerverwaltung</a></li><?php } ?>
       </ul>
 
       <ul id="drop_profile" class="dropdown-content dropdown-below white">
@@ -80,15 +79,6 @@
     <main>
       <br>
       <div class="row">
-        <div class="col l12 m12 s12">
-          <div class="card-panel">
-            <div class="input-field">
-              <input type="text" name="name" id="name" maxlength="80" placeholder="Company" value="<?php if(isset($_POST['update'])) { echo $firmenname; } else { echo $einstellung['firmenname']; } ?>" required />
-              <label for="name">Firmenname</label>
-            </div>
-          </div>
-        </div>
-
       <!--
         <div class="col l4 m4 s12">
           <div class="card-panel">
@@ -148,9 +138,9 @@
                   foreach ($pdo->query("SELECT * FROM farbe ORDER BY id") as $row) {
                     if($row['hexcode'] == $design['headerfarbe']) {
                 ?>
-                <option value="<?php echo $row['hexcode']; ?>" selected><?php echo $row['name']; ?></option>
+                <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png" selected><?php echo $row['name']; ?></option>
                 <?php } else { ?>
-                  <option value="<?php echo $row['hexcode']; ?>"><?php echo $row['name']; ?></option>
+                  <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png"><?php echo $row['name']; ?></option>
                 <?php } } ?>
              </select>
              <label for="header">Header Farbe</label>
@@ -173,9 +163,9 @@
                   foreach ($pdo->query("SELECT * FROM farbe ORDER BY id") as $row) {
                     if($row['hexcode'] == $design['akzentfarbe']) {
                 ?>
-                <option value="<?php echo $row['hexcode']; ?>" selected><?php echo $row['name']; ?></option>
+                <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png" selected><?php echo $row['name']; ?></option>
                 <?php } else { ?>
-                  <option value="<?php echo $row['hexcode']; ?>"><?php echo $row['name']; ?></option>
+                  <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png"><?php echo $row['name']; ?></option>
                 <?php } } ?>
              </select>
              <label for="akzent">Akzent Farbe</label>
@@ -198,9 +188,9 @@
                   foreach ($pdo->query("SELECT * FROM farbe ORDER BY id") as $row) {
                     if($row['hexcode'] == $design['footerfarbe']) {
                 ?>
-                <option value="<?php echo $row['hexcode']; ?>" selected><?php echo $row['name']; ?></option>
+                <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png" selected><?php echo $row['name']; ?></option>
                 <?php } else { ?>
-                  <option value="<?php echo $row['hexcode']; ?>"><?php echo $row['name']; ?></option>
+                  <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png"><?php echo $row['name']; ?></option>
                 <?php } } ?>
              </select>
              <label for="footer">Header Farbe</label>

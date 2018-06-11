@@ -33,6 +33,7 @@
         <li><a href="contact"><i class="material-icons">phone</i> Kontakt</a></li>
         <li class="divider"></li>
         <li><a href="settings"><i class="material-icons">settings</i> Einstellungen</a></li>
+        <li><a href="design"><i class="material-icons">format_paint</i> Design</a></li>
         <li><a href="users"><i class="material-icons">person</i> Benutzerverwaltung</a></li>
       </ul>
 

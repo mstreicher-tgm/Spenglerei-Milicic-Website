@@ -1,3 +1,4 @@
+DROP DATABASE milicic;
 CREATE DATABASE milicic;
 USE milicic;
 

@@ -9,6 +9,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   </head>
   <body>
+    <?php
+      session_start();
+      require_once('../../assets/php/connector.php');
+      require_once('../../assets/php/password.php');
+      require_once('../../assets/php/functions.php');
+
+      $adminuser = check_user();
+    ?>
 
     <header>
       <div class="navbar-fixed">
@@ -33,7 +41,8 @@
         <li><a href="../contact"><i class="material-icons">phone</i> Kontakt</a></li>
         <li class="divider"></li>
         <li><a href="../settings"><i class="material-icons">settings</i> Einstellungen</a></li>
-        <li><a href="../users"><i class="material-icons">person</i> Benutzerverwaltung</a></li>
+        <li><a href="../design"><i class="material-icons">format_paint</i> Design</a></li>
+        <?php if($adminuser['eigentümer']) { ?><li><a href="../users"><i class="material-icons">person</i> Benutzerverwaltung</a></li><?php } ?>
       </ul>
 
       <ul id="drop_profile" class="dropdown-content dropdown-below white">
