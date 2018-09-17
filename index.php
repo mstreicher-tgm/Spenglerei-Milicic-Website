@@ -4,13 +4,8 @@
   require_once('assets/php/password.php');
   require_once('assets/php/functions.php');
 
-  $statement = $pdo->prepare("SELECT * FROM einstellung WHERE id = :id");
-  $result = $statement->execute(array('id' => 1));
-  $einstellung = $statement->fetch();
-
-  $statement = $pdo->prepare("SELECT * FROM design WHERE id = :id");
-  $result = $statement->execute(array('id' => 1));
-  $design = $statement->fetch();
+  $einstellung = getSettings();
+  $design = getDesign();
 
   $statement = $pdo->prepare("SELECT * FROM person");
   $result = $statement->execute();
@@ -38,7 +33,6 @@
                 <li id="navhome"><a class="page-scroll" href="#home"><i class="material-icons left">home</i> Start</a></li>
                 <li id="navabout"><a class="page-scroll" href="#about"><i class="material-icons left">group</i> Über Uns</a></li>
                 <li id="navblog"><a class="page-scroll" href="#blog"><i class="material-icons left">edit</i> Blog</a></li>
-                <li id="navgalerie"><a class="page-scroll" href="#galerie"><i class="material-icons left">insert_photo</i> Galerie</a></li>
                 <li id="navcontact"><a class="page-scroll" href="#contact"><i class="material-icons left">phone</i> Kontakt</a></li>
               </ul>
             </div>
@@ -47,11 +41,10 @@
         </nav>
       </div>
 
-      <ul class="sidenav" id="mobile-menu"
+      <ul class="sidenav" id="mobile-menu">
         <li id="sidenavhome"><a class="page-scroll sidenav-close" href="#home"><i class="material-icons left">home</i> Start</a></li>
         <li id="sidenavabout"><a class="page-scroll sidenav-close" href="#about"><i class="material-icons left">group</i> Über Uns</a></li>
         <li id="sidenavblog"><a class="page-scroll sidenav-close" href="#blog"><i class="material-icons left">edit</i> Blog</a></li>
-        <li id="sidenavgalerie"><a class="page-scroll sidenav-close" href="#galerie"><i class="material-icons left">insert_photo</i> Galerie</a></li>
         <li id="sidenavcontact"><a class="page-scroll sidenav-close" href="#contact"><i class="material-icons left">phone</i> Kontakt</a></li>
       </ul>
     </header>
@@ -67,13 +60,25 @@
       <div class="slider fullscreen" id="home">
         <ul class="slides">
           <li class="center-align">
-            <img src="<?php echo $design['slider1']; ?>">
+            <?php if($design['slider1'] != null) { ?>
+              <img src="assets/img/lib/<?php echo $design['slider1']; ?>">
+            <?php } else { ?>
+              <img src="assets/img/default-slider.png">
+            <?php } ?>
           </li>
           <li class="center-align">
-            <img src="<?php echo $design['slider2']; ?>">
+            <?php if($design['slider2'] != null) { ?>
+              <img src="assets/img/lib/<?php echo $design['slider2']; ?>">
+            <?php } else { ?>
+              <img src="assets/img/default-slider.png">
+            <?php } ?>
           </li>
           <li class="center-align">
-            <img src="<?php echo $design['slider3']; ?>">
+            <?php if($design['slider3'] != null) { ?>
+              <img src="assets/img/lib/<?php echo $design['slider3']; ?>">
+            <?php } else { ?>
+              <img src="assets/img/default-slider.png">
+            <?php } ?>
           </li>
         </ul>
       </div>
@@ -181,26 +186,36 @@
         <div class="container center-align">
           <h3>Blog</h3>
           <br>
-          <p>
-            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-          </p>
+          <div class="row">
+          <?php foreach ($pdo->query("SELECT * FROM blogdata ORDER BY id DESC LIMIT 3") as $row) { ?>
+              <?php if($row['quelle'] != null) { ?>
+              <div class="col l3 m4 s12">
+                <br>
+                <img src="assets/img/lib/<?php echo $row['quelle']; ?>" width="100%" />
+              </div>
+              <div class="col l9 m8 s12 left-align">
+                <h5><?php echo $row['titel']; ?></h5>
+                <p class="block-align"><?php echo $row['inhalt']; ?></p>
+              </div>
+              <?php } else { ?>
+              <div class="col l12 m12 s12 left-align">
+                <h5><?php echo $row['titel']; ?></h5>
+                <p class="block-align"><?php echo $row['inhalt']; ?></p>
+              </div>
+              <?php } ?>
+          <?php } ?>
+          </div>
         </div>
       </div>
 
-      <div class="section grey lighten-4" id="galerie">
-        <div class="container center-align">
-          <h3>Galerie</h3>
-          <br>
-          <p>
-            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-          </p>
-        </div>
-      </div>
-
-      <div class="section white" id="contact">
+      <div class="section  grey lighten-4" id="contact">
         <div class="container center-align">
           <h3>Kontakt</h3>
           <br>
+          <p>
+            Dieser Seitenabschnitt ist noch im Aufbau!
+          </p>
+          <!--
           <div class="row">
             <div class="col s12 m4 l4">
               <h5 class="center">Standort 1</h5>
@@ -255,11 +270,12 @@
               </p>
             </div>
           </div>
+        -->
           <br>
         </div>
       </div>
 
-      <div class="section grey lighten-4">
+      <div class="section white">
         <div class="container center-align">
           <h3>Impressum</h3>
           <br>
@@ -276,14 +292,9 @@
             <h5 class="white-text">Rechtliche Hinweise</h5>
             <p class="grey-text text-lighten-4 block-align"><?php echo $einstellung['hinweise']; ?></p>
           </div>
-          <div class="col l4 offset-l2 s12">
-            <h5 class="white-text">Links</h5>
-            <ul>
-              <li><a class="grey-text text-lighten-3" href="#!">Link 1</a></li>
-              <li><a class="grey-text text-lighten-3" href="#!">Link 2</a></li>
-              <li><a class="grey-text text-lighten-3" href="#!">Link 3</a></li>
-              <li><a class="grey-text text-lighten-3" href="#!">Link 4</a></li>
-            </ul>
+          <div class="col l5 offset-l1 s12">
+            <h5 class="white-text">Weitere Infos</h5>
+            <p class="grey-text text-lighten-4 block-align">Diese Website wurde im Rahmen eines informationstechnischen Schulprojektes entworfen und durchgeführt. Das Team, dass dieses Website realisiert hat, besteht aus Streicher M. und Heinzel P.</p>
           </div>
         </div>
       </div>

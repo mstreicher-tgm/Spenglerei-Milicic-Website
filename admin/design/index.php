@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css" media="screen,projection"/>
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css" media="screen,projection"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link type="text/css" rel="stylesheet" href="../../assets/css/admin.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -18,26 +18,20 @@
       require_once('../../assets/php/password.php');
       require_once('../../assets/php/functions.php');
 
-      $adminuser = check_user();
-
-      $statement = $pdo->prepare("SELECT * FROM einstellung WHERE id = :id");
-      $result = $statement->execute(array('id' => 1));
-      $einstellung = $statement->fetch();
+      if(!is_checked_in()) {
+        header("location: ../login");
+      }
 
       if(isset($_POST['update'])) {
-
-        $statement = $pdo->prepare("UPDATE design SET firmenname = :firmenname, beschreibung = :beschreibung, hinweise = :hinweise, impressum = :impressum WHERE id = 1");
-        $result = $statement->execute(array('firmenname' => $firmenname, 'beschreibung' => $beschreibung, 'hinweise' => $hinweise, 'impressum' => $impressum));
-
-        if($result) {
-          echo "<script>M.toast({html: 'Design wurden Aktualisieren!'});</script>";
-        } else {
-          echo "<script>M.toast({html: 'Etwas ist schief gelaufen, bitte erneut versuchen!'});</script>";
-        }
-      } else if(isset($_POST['cancel'])) {
-        echo "<script>M.toast({html: 'Einstellungen wurden auf letzte Aktualisierung zurück gesetzt!'});</script>";
-
+        setDesign($_POST['header'], $_POST['akzent'], $_POST['footer'], $_POST['slider1'], $_POST['slider2'], $_POST['slider3']);
       }
+      if(isset($_POST['cancel'])) {
+        echo "<script>M.toast({html: 'Einstellungen wurden auf letzte Aktualisierung zurück gesetzt!'});</script>";
+      }
+
+      $einstellung = getSettings();
+      $design = getDesign();
+      $adminuser = getUser();
     ?>
 
     <header>
@@ -54,7 +48,7 @@
         </nav>
       </div>
 
-      <ul class="side-nav fixed" id="slide-out">
+      <ul class="sidenav sidenav-fixed" id="slide-out">
         <li><a href="../"><i class="material-icons">dashboard</i> Dashboard</a></li>
         <li class="divider"></li>
         <li><a href="../about"><i class="material-icons">group</i> Über Uns</a></li>
@@ -79,74 +73,29 @@
     <main>
       <br>
       <div class="row">
-      <!--
-        <div class="col l4 m4 s12">
-          <div class="card-panel">
-            <div class="file-field input-field">
-              <div class="btn">
-                <span>Datei</span>
-                <input type="file" name="slider1" id="slider1">
-              </div>
-              <div class="file-path-wrapper">
-                <input class="file-path" placeholder="/path/to/file.png" type="text">
-                <label style="margin-left: 110px">Slider 1</label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col l4 m4 s12">
-          <div class="card-panel">
-            <div class="file-field input-field">
-              <div class="btn">
-                <span>Datei</span>
-                <input type="file" name="slider1" id="slider1">
-              </div>
-              <div class="file-path-wrapper">
-                <input class="file-path" placeholder="/path/to/file.png" type="text">
-                <label style="margin-left: 110px">Slider 2</label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col l4 m4 s12">
-          <div class="card-panel">
-            <div class="file-field input-field">
-              <div class="btn">
-                <span>Datei</span>
-                <input type="file" name="slider1" id="slider1">
-              </div>
-              <div class="file-path-wrapper">
-                <input class="file-path" placeholder="/path/to/file.png" type="text">
-                <label style="margin-left: 110px">Slider 3</label>
-              </div>
-            </div>
-          </div>
-        </div>
-      -->
-
         <div class="col l4 m4 s12">
           <div class="card-panel">
             <div class="input-field">
-              <select name="header" id="header">
-                <?php
-                  $statement = $pdo->prepare("SELECT * FROM design WHERE id = :id");
-                  $result = $statement->execute(array('id' => 1));
-                  $design = $statement->fetch();
-
-                  foreach ($pdo->query("SELECT * FROM farbe ORDER BY id") as $row) {
-                    if($row['hexcode'] == $design['headerfarbe']) {
-                ?>
-                <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png" selected><?php echo $row['name']; ?></option>
-                <?php } else { ?>
-                  <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png"><?php echo $row['name']; ?></option>
-                <?php } } ?>
-             </select>
-             <label for="header">Header Farbe</label>
-            </div>
-            <div class="card-panel" id="headershow" style="background-color: <?php echo $design['headerfarbe']; ?>">
-              <br>
+              <div class="row">
+                <div class="col l10 m10 s10">
+                  <select name="header" id="header">
+                    <?php
+                      foreach ($pdo->query("SELECT * FROM farbe ORDER BY id") as $row) {
+                        if($row['hexcode'] == $design['headerfarbe']) {
+                    ?>
+                    <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png" selected><?php echo $row['name']; ?></option>
+                    <?php } else { ?>
+                      <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png"><?php echo $row['name']; ?></option>
+                    <?php } } ?>
+                 </select>
+                 <label for="header">Header Farbe</label>
+                </div>
+                <div class="col l2 m2 s2">
+                  <div class="card-panel" id="headershow" style="background-color: <?php echo $design['headerfarbe']; ?>">
+                    <br>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -154,24 +103,26 @@
         <div class="col l4 m4 s12">
           <div class="card-panel">
             <div class="input-field">
-              <select name="akzent" id="akzent">
-                <?php
-                  $statement = $pdo->prepare("SELECT * FROM design WHERE id = :id");
-                  $result = $statement->execute(array('id' => 1));
-                  $design = $statement->fetch();
-
-                  foreach ($pdo->query("SELECT * FROM farbe ORDER BY id") as $row) {
-                    if($row['hexcode'] == $design['akzentfarbe']) {
-                ?>
-                <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png" selected><?php echo $row['name']; ?></option>
-                <?php } else { ?>
-                  <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png"><?php echo $row['name']; ?></option>
-                <?php } } ?>
-             </select>
-             <label for="akzent">Akzent Farbe</label>
-            </div>
-            <div class="card-panel" id="akzentshow" style="background-color: <?php echo $design['akzentfarbe']; ?>">
-              <br>
+              <div class="row">
+                <div class="col l10 m10 s10">
+                  <select name="akzent" id="akzent">
+                    <?php
+                      foreach ($pdo->query("SELECT * FROM farbe ORDER BY id") as $row) {
+                        if($row['hexcode'] == $design['akzentfarbe']) {
+                    ?>
+                    <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png" selected><?php echo $row['name']; ?></option>
+                    <?php } else { ?>
+                      <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png"><?php echo $row['name']; ?></option>
+                    <?php } } ?>
+                 </select>
+                 <label for="akzent">Akzent Farbe</label>
+                </div>
+                <div class="col l2 m2 s2">
+                  <div class="card-panel" id="akzentshow" style="background-color: <?php echo $design['akzentfarbe']; ?>">
+                    <br>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -179,24 +130,171 @@
         <div class="col l4 m4 s12">
           <div class="card-panel">
             <div class="input-field">
-              <select name="footer" id="footer">
-                <?php
-                  $statement = $pdo->prepare("SELECT * FROM design WHERE id = :id");
-                  $result = $statement->execute(array('id' => 1));
-                  $design = $statement->fetch();
-
-                  foreach ($pdo->query("SELECT * FROM farbe ORDER BY id") as $row) {
-                    if($row['hexcode'] == $design['footerfarbe']) {
-                ?>
-                <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png" selected><?php echo $row['name']; ?></option>
-                <?php } else { ?>
-                  <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png"><?php echo $row['name']; ?></option>
-                <?php } } ?>
-             </select>
-             <label for="footer">Header Farbe</label>
+              <div class="row">
+                <div class="col l10 m10 s10">
+                  <select name="footer" id="footer">
+                    <?php
+                    foreach ($pdo->query("SELECT * FROM farbe ORDER BY id") as $row) {
+                        if($row['hexcode'] == $design['footerfarbe']) {
+                    ?>
+                    <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png" selected><?php echo $row['name']; ?></option>
+                    <?php } else { ?>
+                      <option value="<?php echo $row['hexcode']; ?>" data-icon="../../assets/img/colors/<?php echo $row['id']; ?>.png"><?php echo $row['name']; ?></option>
+                    <?php } } ?>
+                 </select>
+                 <label for="footer">Footer Farbe</label>
+                </div>
+                <div class="col l2 m2 s2">
+                  <div class="card-panel" id="footershow" style="background-color: <?php echo $design['footerfarbe']; ?>">
+                    <br>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="card-panel" id="footershow" style="background-color: <?php echo $design['footerfarbe']; ?>">
-              <br>
+          </div>
+        </div>
+
+
+        <div class="col l4 m4 s4">
+          <div class="card-panel">
+            <?php if($design['slider1'] != null) { ?>
+              <img src="../../assets/img/lib/<?php echo $design['slider1']; ?>" id="previewS1" width="100%">
+            <?php } else { ?>
+              <img src="../../assets/img/default-slider.png" id="previewS1" width="100%">
+            <?php } ?>
+            <br>
+            <center>
+              <a class="waves-effect waves-light btn modal-trigger" href="#imglibS1">Bild Auswählen</a>
+            </center>
+          </div>
+
+          <div id="imglibS1" class="modal">
+            <div class="modal-content">
+              <div class="row">
+                <?php
+                  $path = '../../assets/img/lib';
+                  $handle = opendir($path);
+                  while ($picture = readdir($handle)) {
+                    if (!(is_dir($picture))) {
+                ?>
+                <div class="col l3 m3 s3">
+                  <img class="materialboxed" width="100%" src="<?php echo  $path .'/'. $picture; ?>" />
+                  <p>
+                    <label>
+                      <input type="radio" class="with-gap" name="slider1" id="slider1" value="<?php echo $picture; ?>" <?php if($design['slider1'] == $picture) { ?>checked<?php } ?> />
+                      <span><?php echo $picture; ?></span>
+                    </label>
+                  </p>
+                </div>
+                <?php
+                    }
+                  }
+                  closedir($handle);
+                ?>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <label>
+                <input class="with-gap" name="slider1" id="slider1" type="radio" value="no_picture" <?php if($design['slider1'] == null) { ?>checked<?php } ?>  />
+                <span>Kein Bild auswählen</span>
+              </label>
+              <a class="modal-close waves-effect waves-red btn-flat">Schließen</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col l4 m4 s4">
+          <div class="card-panel">
+            <?php if($design['slider2'] != null) { ?>
+              <img src="../../assets/img/lib/<?php echo $design['slider2']; ?>" id="previewS2" width="100%">
+            <?php } else { ?>
+              <img src="../../assets/img/default-slider.png" id="previewS2" width="100%">
+            <?php } ?>
+            <br>
+            <center>
+              <a class="waves-effect waves-light btn modal-trigger" href="#imglibS2">Bild Auswählen</a>
+            </center>
+          </div>
+
+          <div id="imglibS2" class="modal">
+            <div class="modal-content">
+              <div class="row">
+                <?php
+                  $path = '../../assets/img/lib';
+                  $handle = opendir($path);
+                  while ($picture = readdir($handle)) {
+                    if (!(is_dir($picture))) {
+                ?>
+                <div class="col l3 m3 s3">
+                  <img class="materialboxed" width="100%" src="<?php echo  $path .'/'. $picture; ?>" />
+                  <p>
+                    <label>
+                      <input type="radio" class="with-gap" name="slider2" id="slider2" value="<?php echo $picture; ?>" <?php if($design['slider2'] == $picture) { ?>checked<?php } ?> />
+                      <span><?php echo $picture; ?></span>
+                    </label>
+                  </p>
+                </div>
+                <?php
+                    }
+                  }
+                  closedir($handle);
+                ?>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <label>
+                <input class="with-gap" name="slider2" id="slider2" type="radio" value="no_picture" <?php if($design['slider2'] == null) { ?>checked<?php } ?>  />
+                <span>Kein Bild auswählen</span>
+              </label>
+              <a class="modal-close waves-effect waves-red btn-flat">Schließen</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col l4 m4 s4">
+          <div class="card-panel">
+            <?php if($design['slider3'] != null) { ?>
+              <img src="../../assets/img/lib/<?php echo $design['slider3']; ?>" id="previewS3" width="100%">
+            <?php } else { ?>
+              <img src="../../assets/img/default-slider.png" id="previewS3" width="100%">
+            <?php } ?>
+            <br>
+            <center>
+              <a class="waves-effect waves-light btn modal-trigger" href="#imglibS3">Bild Auswählen</a>
+            </center>
+          </div>
+
+          <div id="imglibS3" class="modal">
+            <div class="modal-content">
+              <div class="row">
+                <?php
+                  $path = '../../assets/img/lib';
+                  $handle = opendir($path);
+                  while ($picture = readdir($handle)) {
+                    if (!(is_dir($picture))) {
+                ?>
+                <div class="col l3 m3 s3">
+                  <img class="materialboxed" width="100%" src="<?php echo  $path .'/'. $picture; ?>" />
+                  <p>
+                    <label>
+                      <input type="radio" class="with-gap" name="slider3" id="slider3" value="<?php echo $picture; ?>" <?php if($design['slider3'] == $picture) { ?>checked<?php } ?> />
+                      <span><?php echo $picture; ?></span>
+                    </label>
+                  </p>
+                </div>
+                <?php
+                    }
+                  }
+                  closedir($handle);
+                ?>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <label>
+                <input class="with-gap" name="slider3" id="slider3" type="radio" value="no_picture" <?php if($design['slider3'] == null) { ?>checked<?php } ?>  />
+                <span>Kein Bild auswählen</span>
+              </label>
+              <a class="modal-close waves-effect waves-red btn-flat">Schließen</a>
             </div>
           </div>
         </div>
@@ -251,6 +349,37 @@
     $("#footer").on('change', function() {
       var value = ""+ $('#footer').val() +"";
       $("#footershow").css("backgroundColor", value);
+    });
+
+    $("input[type=radio]#slider1").on('change', function() {
+
+      var value = $('input[type=radio]#slider1:checked').val();
+
+      if(value == "no_picture") {
+        $("#previewS1").attr('src', "../../assets/img/default-slider.png");
+      } else {
+        $("#previewS1").attr('src', "../../assets/img/lib/"+ value);
+      }
+    });
+    $("input[type=radio]#slider2").on('change', function() {
+
+      var value = $('input[type=radio]#slider2:checked').val();
+
+      if(value == "no_picture") {
+        $("#previewS2").attr('src', "../../assets/img/default-slider.png");
+      } else {
+        $("#previewS2").attr('src', "../../assets/img/lib/"+ value);
+      }
+    });
+    $("input[type=radio]#slider3").on('change', function() {
+
+      var value = $('input[type=radio]#slider3:checked').val();
+
+      if(value == "no_picture") {
+        $("#previewS3").attr('src', "../../assets/img/default-slider.png");
+      } else {
+        $("#previewS3").attr('src', "../../assets/img/lib/"+ value);
+      }
     });
     </script>
   </body>

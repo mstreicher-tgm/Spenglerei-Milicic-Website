@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css" media="screen,projection"/>
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css" media="screen,projection"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link type="text/css" rel="stylesheet" href="../../assets/css/admin.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -17,105 +17,29 @@
         require_once('../../assets/php/password.php');
         require_once('../../assets/php/functions.php');
 
+        if(!is_checked_in()) {
+          header("location: ../login");
+        }
+        if(!is_owner()) {
+          header("location: ../");
+        }
         if(isset($_GET['delete'])) {
-          $id = $_GET['delete'];
-
-          $statement = $pdo->prepare("SELECT * FROM userdata WHERE id = :id");
-          $result = $statement->execute(array('id' => $id));
-          $admin = $statement->fetch();
-
-          if($admin != null) {
-            $statement = $pdo->prepare("DELETE FROM userdata WHERE id = :id");
-            $result = $statement->execute(array('id' => $id));
-
-            if($result) {
-              echo "<script>M.toast({html: 'Benuter wurde erfolgreich gelöscht!'});</script>";
-            } else {
-              echo "<script>M.toast({html: 'Etwas ist schief gelaufen, bitte erneut versuchen!'});</script>";
-            }
-          } else {
-            echo "<script>M.toast({html: 'Dieser Benuter existiert nicht!'});</script>";
-          }
+          deleteUser($_GET['delete']);
         }
-
-
         if(isset($_GET['activate'])) {
-          $id = $_GET['activate'];
-
-          $statement = $pdo->prepare("SELECT * FROM userdata WHERE id = :id");
-          $result = $statement->execute(array('id' => $id));
-          $admin = $statement->fetch();
-
-          if($admin != null) {
-            $statement = $pdo->prepare("UPDATE userdata SET status = 1 WHERE id = :id");
-            $result = $statement->execute(array('id' => $id));
-
-            if($result) {
-              echo "<script>M.toast({html: 'Benuter wurde erfolgreich Aktiviert!'});</script>";
-            } else {
-              echo "<script>M.toast({html: 'Etwas ist schief gelaufen, bitte erneut versuchen!'});</script>";
-            }
-          } else {
-            echo "<script>M.toast({html: 'Dieser Benuter existiert nicht!'});</script>";
-          }
+          activateUser($_GET['activate']);
         }
-
-
         if(isset($_GET['deactivate'])) {
-          $id = $_GET['deactivate'];
-
-          $statement = $pdo->prepare("SELECT * FROM userdata WHERE id = :id");
-          $result = $statement->execute(array('id' => $id));
-          $admin = $statement->fetch();
-
-          if($admin != null) {
-            $statement = $pdo->prepare("UPDATE userdata SET status = 0 WHERE id = :id");
-            $result = $statement->execute(array('id' => $id));
-
-            if($result) {
-              echo "<script>M.toast({html: 'Benuter wurde erfolgreich Deaktiviert!'});</script>";
-            } else {
-              echo "<script>M.toast({html: 'Etwas ist schief gelaufen, bitte erneut versuchen!'});</script>";
-            }
-          } else {
-            echo "<script>M.toast({html: 'Dieser Benuter existiert nicht!'});</script>";
-          }
+          deactivateUser($_GET['deactivate']);
         }
-
         if(isset($_POST['register'])) {
-          $username = $_POST['username'];
-          $passwort = $_POST['passwort'];
-          $passwort2 = $_POST['passwort2'];
-
-          if($passwort == $passwort2) {
-            if(strlen($passwort) >= 8) {
-              $statement = $pdo->prepare("SELECT * FROM userdata WHERE username = :username");
-              $result = $statement->execute(array('username' => $username));
-              $user = $statement->fetch();
-
-              if($user == false) {
-                $password_hash = password_hash($passwort, PASSWORD_DEFAULT);
-
-                $statement = $pdo->prepare("INSERT INTO userdata (username, passwort, status, eigentümer) VALUES (:username, :passwort, true, false)");
-                $result = $statement->execute(array('username' => $username, 'passwort' => $password_hash));
-
-                if($result) {
-                  echo "<script>M.toast({html: 'Benuter wurde erfolgreich erstellt!'});</script>";
-                } else {
-                  echo "<script>M.toast({html: 'Etwas ist schief gelaufen, bitte veruche es erneut!'});</script>";
-                }
-              } else {
-                echo "<script>M.toast({html: 'Username wird bereits verwendet!'});</script>";
-              }
-            } else {
-              echo "<script>M.toast({html: 'Passwort ist zu kurz (min. 8 Zeichen)!'});</script>";
-            }
-          } else {
-            echo "<script>M.toast({html: 'Passwörter stimmen nicht überein!'});</script>";
-          }
+          addUser($_POST['username'], $_POST['passwort'], $_POST['passwort2']);
         }
-    ?>
 
+        $einstellung = getSettings();
+        $design = getDesign();
+        $adminuser = getUser();
+    ?>
 
     <header>
       <div class="navbar-fixed">
@@ -131,7 +55,7 @@
         </nav>
       </div>
 
-      <ul class="side-nav fixed" id="slide-out">
+      <ul class="sidenav sidenav-fixed" id="slide-out">
         <li><a href="../"><i class="material-icons">dashboard</i> Dashboard</a></li>
         <li class="divider"></li>
         <li><a href="../about"><i class="material-icons">group</i> Über Uns</a></li>
@@ -151,68 +75,99 @@
       </ul>
     </header>
 
-    <main>
-      <br>
-      <div class="row">
-        <div class="col l12 m12 s12">
-          <div class="card-panel">
-            <form action="index.php" method="post">
-              <div class="row">
-                <div class="col l12 m12 s12">
-                  <div class="input-field">
-                    <input type="text" name="username" id="username" autocomplete="off" required />
-                    <label for="username">Username</label>
-                  </div>
-                </div>
-                <div class="col l6 m6 s12">
-                  <div class="input-field">
-                    <input type="password" name="passwort" id="passwort" autocomplete="off" required />
-                    <label for="Passwort">Passwort</label>
-                  </div>
-                </div>
-                <div class="col l6 m6 s12">
-                  <div class="input-field">
-                    <input type="password" name="passwort2" id="passwort2" autocomplete="off" required />
-                    <label for="Passwort2">Passwort wiederholen</label>
-                  </div>
-                </div>
-                <div class="col l12 m12 s12 right-align">
-                  <button type="submit" name="register" id="register" class="btn waves-effect waves-light">Erstellen</button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
+    <div class="fixed-action-btn">
+      <a class="btn-floating btn-large teal">
+        <i class="large material-icons">mode_edit</i>
+      </a>
+      <ul>
+        <li><a class="btn-floating red"><i class="material-icons">insert_chart</i></a></li>
+        <li><a class="btn-floating yellow darken-1"><i class="material-icons">format_quote</i></a></li>
+        <li><a class="btn-floating green"><i class="material-icons">delete</i></a></li>
+        <li><a class="btn-floating blue"><i class="material-icons">person_add</i></a></li>
+      </ul>
+    </div>
 
-        <div class="col l12 m12 s12">
-          <div class="card-panel">
-            <table class="striped centered">
-              <thead>
-                <th>ID</th>
-                <th>Bentzername</th>
-                <th>Passwort</th>
-                <th>Status</th>
-                <th>Aktion</th>
-              </thead>
-              <tbody>
-                <?php foreach ($pdo->query("SELECT * FROM userdata ORDER BY id ASC") as $row) { ?>
-                <tr>
-                  <td><?php echo $row['id']; ?></td>
-                  <td><?php echo $row['username']; ?></td>
-                  <td><?php echo $row['passwort']; ?></td>
-                  <td>
-                  <?php if($row['status'] == 1) { ?>
-                    <a href="?deactivate=<?php echo $row['id']; ?>"><span class="new badge green" data-badge-caption="Aktiviert"></span></a>
+
+    <main>
+      <div class="section">
+        <div class="row">
+          <div class="col l12 m12 s12">
+            <div class="card-panel">
+              <form action="index.php" method="post">
+                <div class="row">
+                  <div class="col l12 m12 s12">
+                    <div class="input-field">
+                      <input type="text" name="username" id="username" autocomplete="off" required />
+                      <label for="username">Username</label>
+                    </div>
+                  </div>
+                  <div class="col l6 m6 s12">
+                    <div class="input-field">
+                      <input type="password" name="passwort" id="passwort" autocomplete="off" required />
+                      <label for="Passwort">Passwort</label>
+                    </div>
+                  </div>
+                  <div class="col l6 m6 s12">
+                    <div class="input-field">
+                      <input type="password" name="passwort2" id="passwort2" autocomplete="off" required />
+                      <label for="Passwort2">Passwort wiederholen</label>
+                    </div>
+                  </div>
+                  <div class="col l12 m12 s12 right-align">
+                    <button type="submit" name="register" id="register" class="btn waves-effect waves-light">Erstellen</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="col l12 m12 s12">
+            <div class="card-panel">
+              <table class="striped centered">
+                <thead>
+                  <th>ID</th>
+                  <th>Bentzername</th>
+                  <th>Passwort</th>
+                  <th>Status</th>
+                  <th>Aktion</th>
+                </thead>
+                <tbody>
+                  <?php foreach ($pdo->query("SELECT * FROM userdata ORDER BY id ASC") as $row) { ?>
+                  <?php if($row['eigentümer']) { ?>
+                  <tr>
+                    <td><?php echo $row['id']; ?></td>
+                    <td><?php echo $row['username']; ?></td>
+                    <td><?php echo $row['passwort']; ?></td>
+                    <td>
+                    <?php if($row['status'] == 1) { ?>
+                      <span class="new badge green" data-badge-caption="Aktiviert"></span>
+                    <?php } ?>
+                    <?php if($row['status'] == 0) { ?>
+                      <span class="new badge red" data-badge-caption="Deaktiviert"></span>
+                    <?php } ?>
+                    </td>
+                    <td><a href="" class="btn transparent btn-flat disabled"><i class="material-icons">delete</i></a></td>
+                  </tr>
+                  <?php } else { ?>
+                  <tr>
+                    <td><?php echo $row['id']; ?></td>
+                    <td><?php echo $row['username']; ?></td>
+                    <td><?php echo $row['passwort']; ?></td>
+                    <td>
+                    <?php if($row['status'] == 1) { ?>
+                      <a href="?deactivate=<?php echo $row['id']; ?>"><span class="new badge green" data-badge-caption="Aktiviert"></span></a>
+                    <?php } ?>
+                    <?php if($row['status'] == 0) { ?>
+                      <a href="?activate=<?php echo $row['id']; ?>"><span class="new badge red" data-badge-caption="Deaktiviert"></span></a>
+                    <?php } ?>
+                    </td>
+                    <td><a href="?delete=<?php echo $row['id']; ?>" class="btn transparent btn-flat"><i class="material-icons">delete</i></a></td>
+                  </tr>
                   <?php } ?>
-                  <?php if($row['status'] == 0) { ?>
-                    <a href="?activate=<?php echo $row['id']; ?>"><span class="new badge red" data-badge-caption="Deaktiviert"></span></a>
                   <?php } ?>
-                  </td>
-                  <td><a href="?delete=<?php echo $row['id']; ?>" class="btn transparent btn-flat"><i class="material-icons">delete</i></a></td>
-                </tr>
-                <?php } ?>
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

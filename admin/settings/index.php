@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css" media="screen,projection"/>
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css" media="screen,projection"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link type="text/css" rel="stylesheet" href="../../assets/css/admin.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -18,30 +18,19 @@
       require_once('../../assets/php/password.php');
       require_once('../../assets/php/functions.php');
 
-      $adminuser = check_user();
-
-      $statement = $pdo->prepare("SELECT * FROM einstellung WHERE id = :id");
-      $result = $statement->execute(array('id' => 1));
-      $einstellung = $statement->fetch();
-
-      if(isset($_POST['update'])) {
-        $firmenname = $_POST['name'];
-        $beschreibung = $_POST['description'];
-        $hinweise = $_POST['rules'];
-        $impressum = $_POST['impressum'];
-
-        $statement = $pdo->prepare("UPDATE einstellung SET firmenname = :firmenname, beschreibung = :beschreibung, hinweise = :hinweise, impressum = :impressum WHERE id = 1");
-        $result = $statement->execute(array('firmenname' => $firmenname, 'beschreibung' => $beschreibung, 'hinweise' => $hinweise, 'impressum' => $impressum));
-
-        if($result) {
-          echo "<script>M.toast({html: 'Einstellungen wurden Aktualisieren!'});</script>";
-        } else {
-          echo "<script>M.toast({html: 'Etwas ist schief gelaufen, bitte erneut versuchen!'});</script>";
-        }
-      } else if(isset($_POST['cancel'])) {
-        echo "<script>M.toast({html: 'Einstellungen wurden auf letzte Aktualisierung zurück gesetzt!'});</script>";
-
+      if(!is_checked_in()) {
+        header("location: ../login");
       }
+      if(isset($_POST['update'])) {
+        setSettings($_POST['name'], $_POST['description'], $_POST['rules'], $_POST['impressum']);
+      }
+      if(isset($_POST['cancel'])) {
+        echo "<script>M.toast({html: 'Einstellungen wurden auf letzte Aktualisierung zurück gesetzt!'});</script>";
+      }
+
+      $einstellung = getSettings();
+      $design = getDesign();
+      $adminuser = getUser();
     ?>
 
     <header>
@@ -58,7 +47,7 @@
         </nav>
       </div>
 
-      <ul class="side-nav fixed" id="slide-out">
+      <ul class="sidenav sidenav-fixed" id="slide-out">
         <li><a href="../"><i class="material-icons">dashboard</i> Dashboard</a></li>
         <li class="divider"></li>
         <li><a href="../about"><i class="material-icons">group</i> Über Uns</a></li>
@@ -86,63 +75,16 @@
         <div class="col l12 m12 s12">
           <div class="card-panel">
             <div class="input-field">
-              <input type="text" name="name" id="name" maxlength="80" placeholder="Company" value="<?php if(isset($_POST['update'])) { echo $firmenname; } else { echo $einstellung['firmenname']; } ?>" required />
+              <input type="text" name="name" id="name" maxlength="80" placeholder="Company" value="<?php echo $einstellung['firmenname']; ?>" autocomplete="off" required />
               <label for="name">Firmenname</label>
             </div>
           </div>
         </div>
 
-      <!--
-        <div class="col l4 m4 s12">
-          <div class="card-panel">
-            <div class="file-field input-field">
-              <div class="btn">
-                <span>Datei</span>
-                <input type="file" name="slider1" id="slider1">
-              </div>
-              <div class="file-path-wrapper">
-                <input class="file-path" placeholder="/path/to/file.png" type="text">
-                <label style="margin-left: 110px">Slider 1</label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col l4 m4 s12">
-          <div class="card-panel">
-            <div class="file-field input-field">
-              <div class="btn">
-                <span>Datei</span>
-                <input type="file" name="slider1" id="slider1">
-              </div>
-              <div class="file-path-wrapper">
-                <input class="file-path" placeholder="/path/to/file.png" type="text">
-                <label style="margin-left: 110px">Slider 2</label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col l4 m4 s12">
-          <div class="card-panel">
-            <div class="file-field input-field">
-              <div class="btn">
-                <span>Datei</span>
-                <input type="file" name="slider1" id="slider1">
-              </div>
-              <div class="file-path-wrapper">
-                <input class="file-path" placeholder="/path/to/file.png" type="text">
-                <label style="margin-left: 110px">Slider 3</label>
-              </div>
-            </div>
-          </div>
-        </div>
-      -->
-
         <div class="col l6 m6 s12">
           <div class="card-panel">
             <div class="input-field">
-              <textarea class="materialize-textarea" maxlength="1000" type="text" name="description" id="description" placeholder="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." style="height: 120px; max-height: 120px" required><?php if(isset($_POST['update'])) { echo $beschreibung; } else { echo $einstellung['beschreibung']; } ?></textarea>
+              <textarea class="materialize-textarea" maxlength="1000" type="text" name="description" id="description" placeholder="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." style="height: 120px; max-height: 120px" autocomplete="off" required><?php echo $einstellung['beschreibung']; ?></textarea>
               <label for="description">Beschreibung</label>
             </div>
           </div>
@@ -151,7 +93,7 @@
         <div class="col l6 m6 s12">
           <div class="card-panel">
             <div class="input-field">
-              <textarea class="materialize-textarea" maxlength="1000" type="text" name="rules" id="rules" placeholder="Sämtliche Inhalte sowie die Struktur der Website sind urheberrechtlich geschützt.Die Verwendung von Texten und Bildmaterial (auch auszugsweise) zu privaten und/oder kommerziellen Zwecken bedarf der vorherigen ausdrücklichen schriftlichen Zustimmung." style="height: 120px; max-height: 120px" required><?php if(isset($_POST['update'])) { echo $hinweise; } else { echo $einstellung['hinweise']; } ?></textarea>
+              <textarea class="materialize-textarea" maxlength="1000" type="text" name="rules" id="rules" placeholder="Sämtliche Inhalte sowie die Struktur der Website sind urheberrechtlich geschützt.Die Verwendung von Texten und Bildmaterial (auch auszugsweise) zu privaten und/oder kommerziellen Zwecken bedarf der vorherigen ausdrücklichen schriftlichen Zustimmung." style="height: 120px; max-height: 120px" autocomplete="off" required><?php echo $einstellung['hinweise']; ?></textarea>
               <label for="rules">Rechtliche Hinweise</label>
             </div>
           </div>
@@ -161,7 +103,7 @@
         <div class="col l12 m12 s12">
           <div class="card-panel">
             <div class="input-field">
-              <textarea class="materialize-textarea" maxlength="1000" type="text" name="impressum" id="impressum" placeholder="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." style="height: 120px; max-height: 120px" required><?php if(isset($_POST['update'])) { echo $impressum; } else { echo $einstellung['impressum']; } ?></textarea>
+              <textarea class="materialize-textarea" maxlength="1000" type="text" name="impressum" id="impressum" placeholder="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." style="height: 120px; max-height: 120px" autocomplete="off" required><?php echo $einstellung['impressum']; ?></textarea>
               <label for="impressum">Impressum</label>
             </div>
           </div>

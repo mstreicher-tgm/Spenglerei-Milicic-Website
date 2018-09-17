@@ -41,9 +41,9 @@ CREATE TABLE design (
   headerfarbe varchar(255) NOT NULL,
   footerfarbe varchar(255) NOT NULL,
   akzentfarbe varchar(255) NOT NULL,
-  slider1 varchar(255) NOT NULL,
-  slider2 varchar(255) NOT NULL,
-  slider3 varchar(255) NOT NULL,
+  slider1 text NULL,
+  slider2 text NULL,
+  slider3 text NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -57,11 +57,6 @@ CREATE TABLE userdata (
   PRIMARY KEY (id), UNIQUE (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE bild (
-  id INT unsigned NOT NULL AUTO_INCREMENT,
-  quelle text NOT NULL,
-  PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE farbe (
   id INT unsigned NOT NULL AUTO_INCREMENT,
@@ -70,13 +65,10 @@ CREATE TABLE farbe (
   PRIMARY KEY (id), UNIQUE (name), UNIQUE (hexcode)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
-CREATE TABLE blog (
+CREATE TABLE blogdata (
   id INT unsigned NOT NULL AUTO_INCREMENT,
   titel varchar(255) NOT NULL,
   inhalt text NOT NULL,
-  bild INT unsigned NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY(bild) REFERENCES bild(id)
-  ON UPDATE CASCADE ON DELETE CASCADE
+  quelle text NULL,
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

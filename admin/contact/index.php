@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css" media="screen,projection"/>
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css" media="screen,projection"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link type="text/css" rel="stylesheet" href="../../assets/css/admin.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -15,7 +15,13 @@
       require_once('../../assets/php/password.php');
       require_once('../../assets/php/functions.php');
 
-      $adminuser = check_user();
+      if(!is_checked_in()) {
+        header("location: ../login");
+      }
+
+      $einstellung = getSettings();
+      $design = getDesign();
+      $adminuser = getUser();
     ?>
 
     <header>
@@ -32,7 +38,7 @@
         </nav>
       </div>
 
-      <ul class="side-nav fixed" id="slide-out">
+      <ul class="sidenav sidenav-fixed" id="slide-out">
         <li><a href="../"><i class="material-icons">dashboard</i> Dashboard</a></li>
         <li class="divider"></li>
         <li><a href="../about"><i class="material-icons">group</i> Über Uns</a></li>
